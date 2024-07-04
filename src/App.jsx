@@ -7,6 +7,7 @@ import SidebarLayout from "./layouts/sidebar"; // Use the sidebar layout
 import Index from "./pages/Index.jsx";
 import Discussion from "./pages/Discussion.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
+import Register from "./pages/Register.jsx";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => {
               <Route index element={<Index />} />
               <Route path="discussions" element={<Discussion />} />
               <Route path="profile" element={<UserProfile />} />
+              <Route path="/register" element={<Register />} />
             </Route>
           </Routes>
         </Router>
