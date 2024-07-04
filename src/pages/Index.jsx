@@ -1,6 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const fetchRecentDiscussions = async () => {
   // Replace with actual API call
@@ -10,11 +14,33 @@ const fetchRecentDiscussions = async () => {
   ];
 };
 
+const createPost = async (newPost) => {
+  // Replace with actual API call
+  return { id: Math.random(), ...newPost };
+};
+
 const Index = () => {
+  const queryClient = useQueryClient();
   const { data: discussions, error, isLoading } = useQuery({
     queryKey: ["recentDiscussions"],
     queryFn: fetchRecentDiscussions,
   });
+
+  const mutation = useMutation(createPost, {
+    onSuccess: (newPost) => {
+      queryClient.setQueryData(["recentDiscussions"], (old) => [...old, newPost]);
+    },
+  });
+
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    mutation.mutate({ title, description: content });
+    setTitle("");
+    setContent("");
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading discussions</div>;
@@ -36,6 +62,33 @@ const Index = () => {
             </CardContent>
           </Card>
         ))}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="mt-6">Create New Post</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Post</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                placeholder="Post Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+              <Textarea
+                placeholder="Post Content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+              />
+              <Button type="submit" className="w-full" disabled={mutation.isLoading}>
+                {mutation.isLoading ? "Creating..." : "Create Post"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
